@@ -1,0 +1,103 @@
+import random
+
+#função para gerar amostra
+def GeraAmostra(a, b, n):
+    NUSP = 9380504
+    random.seed(NUSP)
+    amostra = [0] * n
+    for k in range(n):
+        amostra[k] = a + (b - a) * random.random()
+    return amostra
+
+def histograma():
+    #Pedido para geração de novo gráfico e consistência da resposta s ou n
+    while True:
+        novo_grafico = input("Novo Gráfico? (s/n): ")
+
+        if novo_grafico.lower() == 'n':
+            print("Fim do programa.")
+            break
+        elif novo_grafico.lower() != 's':
+            print("Entrada inválida.\nDigite 's' para continuar ou 'n' para encerrar.")
+            continue
+
+        print("\nInsira os limites [a, b) com a < b e a >= 0")
+
+        # Entrada dos limites a e b e consistência dos valores inseridos
+        while True:
+            try:
+                a = float(input("Entre com a: "))
+                if a < 0:
+                    print("a deve ser maior ou igual a 0")
+                    continue
+                b = float(input("Entre com b: "))
+                if b >= 100:
+                    print("b deve ser menor que 100")
+                    continue
+                if b <= a:
+                    print("Limites inválidos.\nCertifique-se de que b seja maior que a.")
+                    continue
+                break
+            except ValueError:
+                print("Entrada inválida. Digite um número válido.")
+
+        # Entrada do tamanho da amostra e do número de intervalos
+        while True:
+            try:
+                tamanho_amostra = int(input("Tamanho da Amostra: "))
+                número_intervalo = int(input("Número de Intervalos: "))
+                if número_intervalo > 10:
+                    print("Máximo de 10 intervalos permitidos.")
+                    continue
+                tamanho_intervalo = (b - a) / número_intervalo
+                if tamanho_intervalo < 0.01:
+                    print("O tamanho do intervalo deve ser maior ou igual a 0.01.")
+                    continue
+                break
+            except ValueError:
+                print("Entrada inválida. Digite um número válido.")
+
+        # Geração da amostra aleatória a partir da função fornecida
+        amostra = GeraAmostra(a, b, tamanho_amostra)
+
+        # Cálculo das frequências dos intervalos
+        frequência_intervalos = {f"{a + (i * tamanho_intervalo):.2f} a {a + ((i + 1) * tamanho_intervalo):.2f}": 0 for i in range(número_intervalo)}
+
+        for valor in amostra:
+            for intervalo in frequência_intervalos:
+                limite_inferior, limite_superior = map(float, intervalo.split(" a "))
+                if limite_inferior <= valor < limite_superior:
+                    frequência_intervalos[intervalo] += 1
+                    break
+
+        # Saída da amostra gerada
+        print("\nAMOSTRA:")
+        print(" ".join(f"{valor:.2f}" for valor in amostra))
+
+        # Saída das frequências dos intervalos
+        print("\n INTERVALO                  FREQUÊNCIA")
+        for intervalo, frequencia in frequência_intervalos.items():
+            print(f"{intervalo:<30} {frequencia:03}")
+
+        # Saída do histograma
+        print("\nHISTOGRAMA:\n")
+        intervalos = [float(intervalo.split(" a ")[0]) for intervalo in frequência_intervalos.keys()]
+        frequencias = [frequencia for frequencia in frequência_intervalos.values()]
+
+        max_frequencia = max(frequencias)
+        for i in range(max_frequencia, 0, -1):
+            line = " "
+            for intervalo, frequencia in zip(intervalos, frequencias):
+                if frequencia >= i:
+                    line += "\u25a0     "
+                else:
+                    line += "      "
+            print(line)
+
+        # Saída dos rótulos dos intervalos
+        print("".join(f"{float(intervalo.split(' a ')[0]):<6.2f}" for intervalo in frequência_intervalos.keys()))
+        print("".join(f"{float(intervalo.split(' a ')[1]):<6.2f}" for intervalo in frequência_intervalos.keys()))
+        # Saída das frequências
+        print("".join(f" {frequencia:0>3}  " for frequencia in frequencias),"\n")
+
+histograma()
